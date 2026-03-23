@@ -1,4 +1,3 @@
-# test_crud.py
 from database import init_db, SessionLocal
 import crud
 import os
@@ -39,7 +38,7 @@ def run_db_tests():
         myfile = crud.register_file(db, "test.txt", "./data/test.txt", 100, algo.algorithm_id, key.key_id)
         print(f"CREATE fisier: {myfile.name}, status: {myfile.status}")
 
-        # update eroare
+        # update 
         updated_file = crud.update_file_status(db, myfile.file_id, "encrypted", "./data/test.txt.enc")
         print(f"UPDATE fisier ID {updated_file.file_id} este acum: {updated_file.status}")
 
