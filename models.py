@@ -1,7 +1,21 @@
+import enum
 from datetime import datetime
 from typing import List, Optional
-from sqlalchemy import ForeignKey, String, Float, DateTime, LargeBinary, Integer
+from sqlalchemy import ForeignKey, String, Float, LargeBinary, Integer, Enum
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+class AlgType(enum.Enum):
+    SYMMETRIC = "symmetric"
+    ASYMMETRIC = "asymmetric"
+
+class StatusType(enum.Enum):
+    RAW = "raw"
+    ENCRYPTED = "encrypted"
+    DECRYPTED = "decrypted"
+
+class OperationType(enum.Enum):
+    ENCRYPTION = "encryption"
+    DECRYPTION = "decryption"
 
 class Base(DeclarativeBase):
     pass
@@ -11,7 +25,7 @@ class Algorithms(Base):
     
     algorithm_id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50))      
-    type: Mapped[str] = mapped_column(String(20))      # symmetric, asymmetric
+    type: Mapped[AlgType] = mapped_column(Enum(AlgType), nullable=False)      # symmetric, asymmetric
     operation_mode: Mapped[Optional[str]] = mapped_column(String(20)) 
     key_size_default: Mapped[int] = mapped_column(Integer)
 
@@ -45,7 +59,7 @@ class Files(Base):
     storage_path: Mapped[str] = mapped_column(String(500))
     extension: Mapped[str] = mapped_column(String(10))
     file_size: Mapped[int] = mapped_column(Integer)
-    status: Mapped[str] = mapped_column(String(20))    # raw, encrypted, decrypted
+    status: Mapped[StatusType] = mapped_column(Enum(StatusType), default=StatusType.RAW)    # raw, encrypted, decrypted
     
     algorithm_id: Mapped[int] = mapped_column(ForeignKey("algorithms.algorithm_id"))
     key_id: Mapped[int] = mapped_column(ForeignKey("keys.key_id"))
@@ -54,7 +68,7 @@ class Performance(Base):
     __tablename__ = "performances"
     
     perform_id: Mapped[int] = mapped_column(primary_key=True)
-    operation: Mapped[str] = mapped_column(String(20)) # encryption, decryption
+    operation: Mapped[OperationType] = mapped_column(Enum(OperationType), nullable=False) # encryption, decryption
     exec_time_ms: Mapped[float] = mapped_column(Float)
     mem_usage_mb: Mapped[float] = mapped_column(Float)
     test_date: Mapped[datetime] = mapped_column(default=datetime.utcnow)
