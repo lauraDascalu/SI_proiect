@@ -59,8 +59,8 @@ class Files(Base):
     storage_path: Mapped[str] = mapped_column(String(500))
     extension: Mapped[str] = mapped_column(String(10))
     file_size: Mapped[int] = mapped_column(Integer)
+    file_hash: Mapped[Optional[str]] = mapped_column(String(64))
     status: Mapped[StatusType] = mapped_column(Enum(StatusType), default=StatusType.RAW)    # raw, encrypted, decrypted
-    
     algorithm_id: Mapped[int] = mapped_column(ForeignKey("algorithms.algorithm_id"))
     key_id: Mapped[int] = mapped_column(ForeignKey("keys.key_id"))
 

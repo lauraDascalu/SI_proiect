@@ -35,7 +35,7 @@ def run_db_tests():
         print(f"CREATE  cheie: {key.tag} (ID: {key.key_id})")
 
         # file
-        myfile = crud.register_file(db, "test.txt", "./data/test.txt", 100, algo.algorithm_id, key.key_id)
+        myfile = crud.register_file(db, "test.txt", "./data/test.txt", 100, algo.algorithm_id, key.key_id, file_hash="hash")
         print(f"CREATE fisier: {myfile.name}, status: {myfile.status}")
 
         # update 
@@ -52,7 +52,7 @@ def run_db_tests():
 
         #delete
         nb = crud.get_all_files(db)
-        print(f"READ nr total de fisiere in lista: {len(algos)}")
+        print(f"READ nr total de fisiere in lista: {len(nb)}")
         booldel = crud.delete_file_record(db, 5)
         print(f"DELETE fisier: {booldel}")
         
