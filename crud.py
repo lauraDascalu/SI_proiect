@@ -88,6 +88,15 @@ def get_performance_comparison(db: Session, file_id: int):
 def get_all_files(db: Session):
     return db.query(Files).all()
 
+def get_algorithm_by_id(db: Session, algo_id: int):
+    return db.query(Algorithms).filter(Algorithms.algorithm_id == algo_id).first()
+
+def get_key_by_id(db: Session, key_id: int):
+    return db.query(Keys).filter(Keys.key_id == key_id).first()
+
+def get_framework_by_id(db: Session, fw_id: int):
+    return db.query(Frameworks).filter(Frameworks.fw_id == fw_id).first()
+
 
 #update
 # crud.py
