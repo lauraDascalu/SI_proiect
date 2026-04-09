@@ -54,7 +54,13 @@ def encrypt_file(db: Session, file_id: int, framework_id: int = 1):
                 result_data = iv + encrypted_data 
 
             elif "RSA" in algo_name.upper():
-                public_key = serialization.load_pem_public_key(key_record.key_public, backend=default_backend())
+                if not key_record.key_public:
+                    raise ValueError("RSA encryption requires a public key, but none was found in the DB.")
+                
+                public_key = serialization.load_pem_public_key(
+                    key_record.key_public,
+                    backend=default_backend()
+                )
                 
                 result_data = public_key.encrypt(
                     data,
@@ -82,9 +88,9 @@ def encrypt_file(db: Session, file_id: int, framework_id: int = 1):
             
         crud.log_performance(
                 db=db,
-                operation="encryption",
-                exec_time_ms=round(end_time, 4),
-                mem_usage_mb=0.1, #to change
+                op="encryption",
+                time_ms=round(end_time, 4),
+                mem_mb=0.1, #to change
                 fw_id=framework_id,
                 file_id=file_id
             )
