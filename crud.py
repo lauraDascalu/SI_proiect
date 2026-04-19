@@ -99,9 +99,7 @@ def get_framework_by_id(db: Session, fw_id: int):
 
 
 #update
-# crud.py
-
-#for raw to encrypted 
+ 
 def update_file_status(db: Session, file_id: int, new_status: str, new_path: str = None):
     file_entry = db.query(Files).filter(Files.file_id == file_id).first()
     if file_entry:
