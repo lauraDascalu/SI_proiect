@@ -22,7 +22,7 @@ def run_test():
     init_db()
     db = SessionLocal()
     
-    STORAGE = "../storage"
+    STORAGE = "storage"
     clear_storage(STORAGE)
 
     try:

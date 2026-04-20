@@ -13,7 +13,7 @@ def seed_database():
         algo_aes = crud.create_algorithm(
             db, 
             name="AES-256", 
-            type=AlgType.SYMMETRIC, 
+            type=AlgType.symmetric, 
             key_size=256, 
             mode="CBC"
         )
@@ -22,7 +22,7 @@ def seed_database():
         algo_rsa = crud.create_algorithm(
             db, 
             name="RSA-2048", 
-            type=AlgType.ASYMMETRIC, 
+            type=AlgType.asymmetric, 
             key_size=2048, 
             mode="OAEP"
         )

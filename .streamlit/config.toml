@@ -1,10 +1,14 @@
 [theme]
 primaryColor = "#00ffcc" 
 
-backgroundColor = "#a192c2" 
+backgroundColor = "#e6e4ec" 
 
-secondaryBackgroundColor = "#7963a5" 
+secondaryBackgroundColor = "#d4c9e9" 
 
-textColor = "#d7d1de" 
+textColor = "#0d0c0d" 
 
 font = "sans serif"
+
+[ui]
+
+wideMode = true
