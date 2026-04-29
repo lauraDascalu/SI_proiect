@@ -104,11 +104,44 @@ with col1:
                 
     if not st.session_state.get("new_key_check", False):
         if key_tags:
-            selected_key_tag = st.selectbox("Select key", list(key_tags.keys()))
+           
+
+            keys_list = list(key_tags.keys())
+            keys_per_page = 5
+            
+            if "key_page" not in st.session_state:
+                st.session_state.key_page = 0
+            
+            total_key_pages = (len(keys_list) - 1) // keys_per_page + 1
+            
+            start_k = st.session_state.key_page * keys_per_page
+            end_k = start_k + keys_per_page
+            current_keys_view = keys_list[start_k:end_k]
+            
+
+            selected_key_tag = st.selectbox(
+                f"Select key ", 
+                current_keys_view
+            )
             selected_key = key_tags.get(selected_key_tag)
+
+            
+            k_prev, k_page, k_next = st.columns([1, 2, 1])
+            
+            with k_prev:
+                if st.button("<- Prev", key="prev_key", use_container_width=True) and st.session_state.key_page > 0:
+                    st.session_state.key_page -= 1
+                    st.rerun()
+            
+            with k_page:
+                st.markdown(f"<p style='text-align: center;'>Set {st.session_state.key_page + 1}/{total_key_pages}</p>", unsafe_allow_html=True)
+            
+            with k_next:
+                if st.button("Next ->", key="next_key", use_container_width=True) and st.session_state.key_page < total_key_pages - 1:
+                    st.session_state.key_page += 1
+                    st.rerun()
         else:
             st.warning("No keys available for this algorithm. Create one!")
-
 with col2:
     st.subheader("File")
     uploaded_file = st.file_uploader("Load file to encrypt")
@@ -188,7 +221,34 @@ if files:
     
     if history_data:
        
-        st.table(history_data)
+        items_per_page = 5
+        if "current_page" not in st.session_state:
+            st.session_state.current_page = 0
+            
+        total_pages = (len(history_data) - 1) // items_per_page + 1
+        
+        
+        start_idx = st.session_state.current_page * items_per_page
+        end_idx = start_idx + items_per_page
+        data = history_data[start_idx:end_idx]
+      
+        st.table(data)
+        
+      
+        col_prev, col_page, col_next = st.columns([1, 2, 1])
+        
+        if col_prev.button("<- Previous", use_container_width=True) and st.session_state.current_page > 0:
+            st.session_state.current_page -= 1
+            st.rerun()
+            
+        with col_page:
+            st.markdown(f"<p style='text-align: center;'>Page {st.session_state.current_page + 1} of {total_pages}</p>", unsafe_allow_html=True)
+        
+        with col_next:
+            if st.button("Next ->", use_container_width=True) and st.session_state.current_page < total_pages - 1:
+                st.session_state.current_page += 1
+                st.rerun()
+           
     else:
         st.info("No files in history yet.")
 
@@ -202,17 +262,22 @@ if files:
         target_file = action_options[selected_file_name]
 
         
-        if target_file.status.value == "encrypted":
+        if target_file.status.value == "encrypted" or target_file.status.value == "ENCRYPTED":
             if st.button("Decrypt selected file"):
                 try:
-                    process_file(db, target_file.file_id, framework_id=selected_fw_id, mode="decrypt")
+                    if(target_file.status.value == "ENCRYPTED"):
+                        process_file(db, target_file.file_id, framework_id=selected_fw_id, mode="DECRYPT")
+                    
+                    if(target_file.status.value == "encrypted"):
+                        process_file(db, target_file.file_id, framework_id=selected_fw_id, mode="decrypt")
+                        
                     st.success("File decrypted!")
                     st.rerun()
                 except Exception as e:
                     st.error(f"Decryption error: {e}")
 
         
-        elif target_file.status.value == "decrypted":
+        elif target_file.status.value == "decrypted" or target_file.status.value == "DECRYPTED" :
             if os.path.exists(target_file.storage_path):
                 with open(target_file.storage_path, "rb") as f_to_download:
                     st.download_button(
