@@ -3,5 +3,5 @@
 ### Proiect: Securitate informationala
 ---
 ### Schema baza de date
-<img width="1082" height="786" alt="si_bd drawio" src="https://github.com/user-attachments/assets/9449ef44-07c8-4c90-a9a7-22d10c6427de" />
+<img width="1142" height="846" alt="si_bd proiect" src="https://github.com/user-attachments/assets/de22e64b-6302-4dff-a868-17bebfba15ae" />
 --
