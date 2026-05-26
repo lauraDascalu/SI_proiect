@@ -158,10 +158,9 @@ with col2:
                
                 max_rsa_bytes = (selected_key.key_size // 8) - 66
                 if uploaded_file.size > max_rsa_bytes:
-                    st.error(f" RSA Error: File too big ({uploaded_file.size} bytes). "
-                             f"RSA-2048 suports max {max_rsa_bytes} bytes. "
-                             "Try a small .txt file.")
-                    st.stop()
+                    st.error(f" RSA Error: File too big! "
+                             f"Max supported {max_rsa_bytes} bytes.")
+                    # st.stop()
 
             temp_path = f"./data/{uploaded_file.name}"
             os.makedirs("./data", exist_ok=True)
@@ -192,7 +191,12 @@ with col2:
                         file_name=os.path.basename(enc_path)
                     )
             except Exception as e:
-                st.error(f"Error during processing: {e}")
+                error_str = str(e).lower()
+
+                if 'file_rec' in locals():
+                    crud.delete_file_record(db, file_rec.file_id)
+                else:
+                    st.error(f"Error during processing: {e}")
 
 st.divider()
 st.subheader("File history")
