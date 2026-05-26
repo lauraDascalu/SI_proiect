@@ -84,7 +84,7 @@ def encrypt_file(db: Session, file_id: int, framework_id: int = 1):
         if not file_record.file_hash:
                 file_record.file_hash = calculate_file_hash(file_path)
 
-        crud.update_file_status(db, file_id, StatusType.encrypted, output_path)
+        crud.update_file_status(db, file_id, StatusType.ENCRYPTED, output_path)
             
         crud.log_performance(
                 db=db,
@@ -108,7 +108,7 @@ def decrypt_file(db: Session, file_id: int, framework_id: int = 1):
     if not file_record:
         raise ValueError("The file does not exist.")
     
-    if file_record.status != StatusType.encrypted:
+    if file_record.status != StatusType.ENCRYPTED:
         raise ValueError("File is not in encrypted status.")
 
     key_record = crud.get_key_by_id(db, file_record.key_id)
@@ -178,14 +178,13 @@ def decrypt_file(db: Session, file_id: int, framework_id: int = 1):
         end_time = (time.time() - start_time) * 1000
 
        
-        crud.update_file_status(db, file_id, StatusType.decrypted, output_path)
+        crud.update_file_status(db, file_id, StatusType.DECRYPTED, output_path)
         
         
         crud.log_performance(
             db=db,
             op="decryption",
             time_ms=round(end_time, 4),
-            mem_mb=0.1,
             fw_id=framework_id,
             file_id=file_id
         )

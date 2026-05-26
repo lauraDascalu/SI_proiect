@@ -148,7 +148,7 @@ with col2:
                 )
 
                 
-                enc_path = process_file(db, file_rec.file_id, framework_id=selected_fw_id, mode = "encrypt")
+                enc_path = process_file(db, file_rec.file_id, framework_id=selected_fw_id, mode = "ENCRYPT")
                 
                 st.success(f"Successfully encrypted: {os.path.basename(enc_path)}")
                 
@@ -202,17 +202,17 @@ if files:
         target_file = action_options[selected_file_name]
 
         
-        if target_file.status.value == "encrypted":
+        if target_file.status.value == "ENCRYPTED":
             if st.button("Decrypt selected file"):
                 try:
-                    process_file(db, target_file.file_id, framework_id=selected_fw_id, mode="decrypt")
+                    process_file(db, target_file.file_id, framework_id=selected_fw_id, mode="DECRYPT")
                     st.success("File decrypted!")
                     st.rerun()
                 except Exception as e:
                     st.error(f"Decryption error: {e}")
 
         
-        elif target_file.status.value == "decrypted":
+        elif target_file.status.value == "DECRYPTED":
             if os.path.exists(target_file.storage_path):
                 with open(target_file.storage_path, "rb") as f_to_download:
                     st.download_button(
