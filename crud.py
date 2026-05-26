@@ -46,11 +46,10 @@ def register_file(db: Session, name: str, path: str, size: int, algo_id: int, ke
     db.refresh(new_file)
     return new_file
 
-def log_performance(db: Session, op: str, time_ms: float, mem_mb: float, fw_id: int, file_id: int):
+def log_performance(db: Session, op: str, time_ms: float,  fw_id: int, file_id: int):
     perf = Performance(
         operation=op,
         exec_time_ms=time_ms,
-        mem_usage_mb=mem_mb,
         fw_id=fw_id,
         file_id=file_id,
        

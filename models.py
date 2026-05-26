@@ -5,17 +5,17 @@ from sqlalchemy import ForeignKey, String, Float, LargeBinary, Integer, Enum
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 class AlgType(enum.Enum):
-    symmetric = "symmetric"
-    asymmetric = "asymmetric"
+    SYMMETRIC = "SYMMETRIC"
+    ASYMMETRIC = "ASYMMETRIC"
 
 class StatusType(enum.Enum):
-    raw = "raw"
-    encrypted = "encrypted"
-    decrypted = "decrypted"
+    RAW = "RAW"
+    ENCRYPTED = "ENCRYPTED"
+    DECRYPTED = "DECRYPTED"
 
 class OperationType(enum.Enum):
-    encryption = "encryption"
-    decryption = "decryption"
+    ENCRYPTION = "ENCRYPTION"
+    DECRYPTION = "DECRYPTION"
 
 class Base(DeclarativeBase):
     pass
@@ -60,7 +60,7 @@ class Files(Base):
     extension: Mapped[str] = mapped_column(String(10))
     file_size: Mapped[int] = mapped_column(Integer)
     file_hash: Mapped[Optional[str]] = mapped_column(String(64))
-    status: Mapped[StatusType] = mapped_column(Enum(StatusType), default=StatusType.raw)    # raw, encrypted, decrypted
+    status: Mapped[StatusType] = mapped_column(Enum(StatusType), default=StatusType.RAW)    # raw, encrypted, decrypted
     algorithm_id: Mapped[int] = mapped_column(ForeignKey("algorithms.algorithm_id"))
     key_id: Mapped[int] = mapped_column(ForeignKey("keys.key_id"))
 
@@ -70,7 +70,7 @@ class Performance(Base):
     perform_id: Mapped[int] = mapped_column(primary_key=True)
     operation: Mapped[OperationType] = mapped_column(Enum(OperationType), nullable=False) # encryption, decryption
     exec_time_ms: Mapped[float] = mapped_column(Float)
-    mem_usage_mb: Mapped[float] = mapped_column(Float)
+   
     test_date: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     
     fw_id: Mapped[int] = mapped_column(ForeignKey("frameworks.fw_id"))

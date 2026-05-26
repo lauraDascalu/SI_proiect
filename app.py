@@ -181,7 +181,7 @@ with col2:
                 )
 
                 
-                enc_path = process_file(db, file_rec.file_id, framework_id=selected_fw_id, mode = "encrypt")
+                enc_path = process_file(db, file_rec.file_id, framework_id=selected_fw_id, mode = "ENCRYPT")
                 
                 st.success(f"Successfully encrypted: {os.path.basename(enc_path)}")
                 

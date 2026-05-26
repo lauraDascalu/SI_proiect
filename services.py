@@ -9,9 +9,11 @@ def process_file(db: Session, file_id: int, framework_id: int, mode: str = "encr
     if not file_entry:
         raise ValueError(f"File doesn't exist.")
 
-    if mode == "encrypt":
+    #if mode == "encrypt":
+    if mode == "ENCRYPT":
         return encrypt_file(db, file_id, framework_id)
-    elif mode == "decrypt":
+    #elif mode == "decrypt":
+    elif mode == "DECRYPT":
         return decrypt_file(db, file_id, framework_id)
     else:
         raise ValueError("Mode must be 'encrypt' or 'decrypt'!")
