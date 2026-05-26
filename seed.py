@@ -6,14 +6,18 @@ def seed_database():
     init_db()
     
     db = SessionLocal()
-    try:
+    try: 
         fw = crud.create_framework(db, name="Cryptography", version="42.0.5")
         print(f"[*] Created framework: {fw.name} (ID: {fw.fw_id})")
+
+        fw_openssl = crud.create_framework(db, name="OpenSSL", version="3.2.4")
+        print(f"[*] Created framework: {fw_openssl.name} (ID: {fw_openssl.fw_id})")
+        
 
         algo_aes = crud.create_algorithm(
             db, 
             name="AES-256", 
-            type=AlgType.symmetric, 
+            type=AlgType.SYMMETRIC, 
             key_size=256, 
             mode="CBC"
         )
@@ -22,7 +26,7 @@ def seed_database():
         algo_rsa = crud.create_algorithm(
             db, 
             name="RSA-2048", 
-            type=AlgType.asymmetric, 
+            type=AlgType.ASYMMETRIC, 
             key_size=2048, 
             mode="OAEP"
         )

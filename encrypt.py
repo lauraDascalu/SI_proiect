@@ -10,6 +10,12 @@ from models import StatusType, Keys, Algorithms, Frameworks
 import time
 from sqlalchemy.orm import Session
 
+
+import subprocess
+import tempfile
+
+OPENSSL_PATH = r"C:\Program Files\Git\usr\bin\openssl.exe"
+
 def calculate_file_hash(file_path: str):
     sha256_hash = hashlib.sha256()
     with open(file_path, "rb") as f:
@@ -72,12 +78,66 @@ def encrypt_file(db: Session, file_id: int, framework_id: int = 1):
                 )
             else:
                 raise ValueError("Unsupported algorithm.")
-
-        else:
-            raise NotImplementedError("Alternative framework not ready")
-    
-        with open(output_path, "wb") as f:
+            
+            with open(output_path, "wb") as f:
                 f.write(result_data)
+
+        elif "openssl" in framework_name:
+            if "AES" in algo_name:
+                
+
+                iv = os.urandom(16)
+                iv_hex = iv.hex()
+                key_hex = key_record.key_private.hex()
+
+                # command: openssl enc -aes-256-cbc -K <key> -iv <iv> -in <p_text> -out <c_text>
+                cmd = [
+                    OPENSSL_PATH, "enc", "-aes-256-cbc", "-e",
+                    "-K", key_hex,
+                    "-iv", iv_hex,
+                    "-in", file_path,
+                    "-out", output_path
+                ]
+                subprocess.run(cmd, check=True)
+
+                
+                with open(output_path, "rb") as f:
+                    encrypted_content = f.read()
+                with open(output_path, "wb") as f:
+                    f.write(iv + encrypted_content)
+
+            elif "RSA" in algo_name:
+                if not key_record.key_public:
+                    raise ValueError("RSA encryption requires a public key.")
+                
+                
+                with tempfile.NamedTemporaryFile(delete=False, mode="wb") as pub_file:
+                    pub_file.write(key_record.key_public)
+                    pub_file_path = pub_file.name
+
+                try:
+                    # command: openssl pkeyutl -encrypt -pubin -inkey pub.pem -in plain.txt -out enc.txt -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_mgf1_md:sha256 -pkeyopt rsa_oaep_md:sha256
+                    cmd = [
+                        OPENSSL_PATH, "pkeyutl", "-encrypt", "-pubin",
+                        "-inkey", pub_file_path,
+                        "-in", file_path,
+                        "-out", output_path,
+                        "-pkeyopt", "rsa_padding_mode:oaep",
+                        "-pkeyopt", "rsa_mgf1_md:sha256",
+                        "-pkeyopt", "rsa_oaep_md:sha256"
+                    ]
+                    subprocess.run(cmd, check=True)
+                finally:
+                    if os.path.exists(pub_file_path):
+                        os.remove(pub_file_path)
+            else:
+                raise ValueError("Unsupported algorithm.")
+        else:
+            raise NotImplementedError("Selected framework is not implemented.")
+        
+
+        # with open(output_path, "wb") as f:
+        #         f.write(result_data)
 
         end_time = (time.time() - start_time) * 1000
 
@@ -88,9 +148,8 @@ def encrypt_file(db: Session, file_id: int, framework_id: int = 1):
             
         crud.log_performance(
                 db=db,
-                op="encryption",
+                op="ENCRYPTION",
                 time_ms=round(end_time, 4),
-                mem_mb=0.1, #to change
                 fw_id=framework_id,
                 file_id=file_id
             )
@@ -119,8 +178,8 @@ def decrypt_file(db: Session, file_id: int, framework_id: int = 1):
     algo_name = algo_record.name
     framework_name = fw_record.name.lower()
 
-    with open(file_path, "rb") as f:
-        encrypted_data = f.read()
+    # with open(file_path, "rb") as f:
+    #     encrypted_data = f.read()
 
     
     output_path = file_path.replace(".enc", "") 
@@ -130,6 +189,10 @@ def decrypt_file(db: Session, file_id: int, framework_id: int = 1):
 
     try:
         if "cryptography" in framework_name:
+            
+            with open(file_path, "rb") as f:
+                encrypted_data = f.read()
+
             if "AES" in algo_name.upper():
                 
                 iv = encrypted_data[:16]
@@ -163,17 +226,82 @@ def decrypt_file(db: Session, file_id: int, framework_id: int = 1):
                 )
             else:
                 raise ValueError("Unsupported algorithm.")
-        else:
-            raise NotImplementedError("Alternative framework not ready")
+            
+            with open(output_path, "wb") as f:
+                f.write(result_data)
+        
+        elif "openssl" in framework_name:
+            if "AES" in algo_name:
+                with open(file_path, "rb") as f:
+                    file_content = f.read()
+                
+                
+                iv = file_content[:16]
+                actual_ciphertext = file_content[16:]
 
+                
+                with tempfile.NamedTemporaryFile(delete=False, mode="wb") as cipher_file:
+                    cipher_file.write(actual_ciphertext)
+                    cipher_file_path = cipher_file.name
+
+                try:
+                    cmd = [
+                        OPENSSL_PATH, "enc", "-aes-256-cbc", "-d",
+                        "-K", key_record.key_private.hex(),
+                        "-iv", iv.hex(),
+                        "-in", cipher_file_path,
+                        "-out", output_path
+                    ]
+                    subprocess.run(cmd, check=True)
+                finally:
+                    if os.path.exists(cipher_file_path):
+                        os.remove(cipher_file_path)
+
+            elif "RSA" in algo_name:
+
+
+                with tempfile.NamedTemporaryFile(delete=False, mode="wb") as priv_file:
+                    priv_file.write(key_record.key_private)
+                    priv_file_path = priv_file.name
+
+                try:
+                    # command: openssl pkeyutl -decrypt -inkey priv.pem -in enc.txt -out plain.txt ...
+                    cmd = [
+                        OPENSSL_PATH, "pkeyutl", "-decrypt",
+                        "-inkey", priv_file_path,
+                        "-in", file_path,
+                        "-out", output_path,
+                        "-pkeyopt", "rsa_padding_mode:oaep",
+                        "-pkeyopt", "rsa_mgf1_md:sha256",
+                        "-pkeyopt", "rsa_oaep_md:sha256"
+                    ]
+                    subprocess.run(cmd, check=True)
+                finally:
+                    if os.path.exists(priv_file_path):
+                        os.remove(priv_file_path)
+            else:
+                raise ValueError("Unsupported algorithm.")
+        else:
+            raise NotImplementedError("Selected framework is not implemented.")
+        
+
+        if "openssl" in framework_name:
+            if os.path.exists(output_path):
+                with open(output_path, "rb") as f:
+                    result_data = f.read()
+            else:
+                raise FileNotFoundError(f"Decrypted file was not created by OpenSSL at {output_path}")
+            
         # verificare integritate
         current_hash = hashlib.sha256(result_data).hexdigest()
         if file_record.file_hash and file_record.file_hash != current_hash:
             raise ValueError(f"Integrity check failed!")
         
         
-        with open(output_path, "wb") as f:
-            f.write(result_data)
+        if "cryptography" in framework_name:
+            with open(output_path, "wb") as f:
+                f.write(result_data)
+
 
         end_time = (time.time() - start_time) * 1000
 
@@ -183,7 +311,7 @@ def decrypt_file(db: Session, file_id: int, framework_id: int = 1):
         
         crud.log_performance(
             db=db,
-            op="decryption",
+            op="DECRYPTION",
             time_ms=round(end_time, 4),
             fw_id=framework_id,
             file_id=file_id

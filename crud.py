@@ -30,7 +30,7 @@ def create_key(db: Session, tag: str, private_b: bytes, size: int, algo_id: int,
     db.refresh(key_entry)
     return key_entry
 
-def register_file(db: Session, name: str, path: str, size: int, algo_id: int, key_id: int, file_hash: str = None, status: str = "raw"):
+def register_file(db: Session, name: str, path: str, size: int, algo_id: int, key_id: int, file_hash: str = None, status: str = "RAW"):
     new_file = Files(
         name=name,
         storage_path=path,
