@@ -25,7 +25,7 @@ results = (
     .all()
 )
 
-print(f"{'Algoritm':<15} | {'Operație':<12} | {'Latență Medie':<15} | {'Medie Timp/Octet':<20}")
+print(f"{'Algoritm':<15} | {'Operatie':<12} | {'Latenta Medie':<15} | {'Medie Timp/Octet':<20}")
 print("-" * 70)
 
 for row in results:
