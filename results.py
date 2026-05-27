@@ -17,7 +17,6 @@ engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-
 results = (
     session.query(
         Frameworks.name.label("fw_name"),
@@ -38,7 +37,6 @@ print(f"{'Framework':<15} | {'Algoritm':<12} | {'Operatie':<12} | {'Latenta Medi
 print("-" * 85)
 data = []
 for row in results:
-
     total_time = float(row.total_time) if row.total_time else 0.0
     total_bytes = float(row.total_bytes) if row.total_bytes else 0.0
     
